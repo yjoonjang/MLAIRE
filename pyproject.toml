@@ -1,0 +1,47 @@
+[project]
+name = "mlaire"
+version = "0.1.0"
+description = "MLAIRE: a multilingual language-aware information-retrieval evaluation suite"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "datasets>=2.14.0,<4.0.0",
+    "huggingface-hub>=0.24.0",
+    "click>=8.0",
+    "pyyaml>=6.0",
+    "numpy<2",
+    "tqdm>=4.65",
+]
+
+[project.optional-dependencies]
+dense = [
+    # Dense embedders default environment
+    # See setup/venv_main.sh for a fully-tested install.
+    "torch>=2.4",
+    "transformers>=4.40",
+    "sentence-transformers>=3.0",
+    "einops>=0.8",
+    "peft>=0.10",
+]
+sparse = [
+    "bm25s>=0.3",
+    "rank_bm25",
+]
+colbert = [
+    "pylate>=1.4",
+]
+test = [
+    "pytest>=7",
+]
+
+[project.scripts]
+mlaire = "mlaire.cli:cli"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["mlaire*"]
+exclude = ["tests*", "scripts*", "results*", "data*"]

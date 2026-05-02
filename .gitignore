@@ -216,3 +216,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# MLAIRE-specific
+.venv-gte/
+.venv-colbert-sparse/
+data/*/corpus.jsonl
+data/*/queries.jsonl
+data/*/qrels/
+.cache/
+*.npy
+.hf_token
+hf_token.txt
+logs/
+.omc
+.claude

@@ -1,0 +1,9 @@
+# XQuAD evaluation, top-20.
+datasets:
+  xquad:
+    languages: [en, es, de, el, ru, tr, ar, vi, th, zh, hi, ro]
+k_values: [20]
+# MRR / LPR look at the full first-relevant rank, so retrieve deeper than the
+# k-set. 200 matches the depth used to produce the canonical paper results.
+retrieval_top_k: 200
+output_dir: results

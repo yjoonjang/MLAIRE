@@ -1,0 +1,9 @@
+# Belebele evaluation, all 122 languages, top-200.
+datasets:
+  belebele:
+    languages: all
+k_values: [200]
+# MRR / LPR look at the full first-relevant rank; the canonical paper run
+# used max(k_values)*2 = 2000, so reproduce that depth here.
+retrieval_top_k: 2000
+output_dir: results
