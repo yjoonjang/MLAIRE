@@ -9,8 +9,6 @@ both standard IR metrics (MRR, nDCG, Recall) and language-aware variants
 (LPR, Lang-MRR, Lang-nDCG, Lang-Recall) along with the top-1 4-way failure
 decomposition (perfect / lang_fail / sem_fail / both_fail).
 
-The submission is fully anonymous; code and data are released under MIT.
-
 ---
 
 ## 1. Datasets
