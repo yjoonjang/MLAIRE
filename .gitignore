@@ -230,3 +230,4 @@ hf_token.txt
 logs/
 .omc
 .claude
+.embed_cache/

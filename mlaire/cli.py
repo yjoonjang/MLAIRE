@@ -421,8 +421,8 @@ def _print_results(results: dict, k_values: list[int]) -> None:
         click.echo(f"  NDCG@{k}:    {agg.get(f'ndcg@{k}', 0):.4f}    Recall@{k}:  {agg.get(f'recall@{k}', 0):.4f}")
     click.echo("")
     click.echo("=== Language-Aware Metrics ===")
-    click.echo(f"  LPR:       {agg['lpr']:.4f}")
     click.echo(f"  Lang-MRR:  {agg.get('lang_mrr', 0):.4f}")
+    click.echo("  (LPR is computed separately via measure_lpr/queue_runner.py)")
     for k in k_values:
         click.echo(f"  Lang-NDCG@{k}: {agg.get(f'lang_ndcg@{k}', 0):.4f}  Lang-Recall@{k}: {agg.get(f'lang_recall@{k}', 0):.4f}")
     click.echo("")

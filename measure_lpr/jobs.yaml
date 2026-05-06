@@ -1,0 +1,83 @@
+# LPR re-measurement jobs.
+#
+# Each entry is one (model, backend, venv) row; the queue runner expands
+# every entry across the ``datasets`` list (or that entry's per-job
+# override) to produce one (model, backend, venv, dataset) job per run.
+#
+# Backends:
+#   dense       -> compute_lpr_dense.py     (--model HFID --dataset DS)
+#   bm25        -> compute_lpr_bm25.py      (--dataset DS)
+#   opensearch  -> compute_lpr_opensearch.py(--dataset DS)
+#   colbert     -> compute_lpr_colbert.py   (--variant {jina|lfm2} --dataset DS)
+#
+# Venvs (relative to repo root):
+#   .venv                main: torch + transformers 5.x + flash-attn
+#   .venv-gte            transformers 4.x — GTE family + jina-v3
+#                        (their custom modelling code breaks under tx 5.x)
+#   .venv-colbert-sparse pylate + bm25s + sentence-transformers SparseEncoder
+
+datasets: [mlqa, xquad, belebele]
+
+jobs:
+  # ============== Dense — main venv (.venv) ==============
+  # Qwen3 family
+  - { backend: dense, venv: .venv, model: "Qwen/Qwen3-Embedding-8B" }
+  - { backend: dense, venv: .venv, model: "Qwen/Qwen3-Embedding-4B" }
+  - { backend: dense, venv: .venv, model: "Qwen/Qwen3-Embedding-0.6B" }
+
+  # multilingual-e5 family (large-instruct included)
+  - { backend: dense, venv: .venv, model: "intfloat/multilingual-e5-large" }
+  - { backend: dense, venv: .venv, model: "intfloat/multilingual-e5-large-instruct" }
+  - { backend: dense, venv: .venv, model: "intfloat/multilingual-e5-base" }
+  - { backend: dense, venv: .venv, model: "intfloat/multilingual-e5-small" }
+
+  # BGE family
+  - { backend: dense, venv: .venv, model: "BAAI/bge-m3" }
+
+  # Jina v5 (v3 goes to .venv-gte)
+  - { backend: dense, venv: .venv, model: "jinaai/jina-embeddings-v5-text-small-retrieval" }
+  - { backend: dense, venv: .venv, model: "jinaai/jina-embeddings-v5-text-nano-retrieval" }
+
+  # Microsoft Harrier
+  - { backend: dense, venv: .venv, model: "microsoft/harrier-oss-v1-0.6b" }
+  - { backend: dense, venv: .venv, model: "microsoft/harrier-oss-v1-270m" }
+
+  # IBM Granite
+  - { backend: dense, venv: .venv, model: "ibm-granite/granite-embedding-278m-multilingual" }
+
+  # Google EmbeddingGemma
+  - { backend: dense, venv: .venv, model: "google/embeddinggemma-300m" }
+
+  # Nomic
+  - { backend: dense, venv: .venv, model: "nomic-ai/nomic-embed-text-v2-moe" }
+
+  # NVIDIA Nemotron
+  - { backend: dense, venv: .venv, model: "nvidia/llama-embed-nemotron-8b" }
+  - { backend: dense, venv: .venv, model: "nvidia/llama-nemotron-embed-1b-v2" }
+
+  # Snowflake Arctic
+  - { backend: dense, venv: .venv, model: "Snowflake/snowflake-arctic-embed-l-v2.0" }
+  - { backend: dense, venv: .venv, model: "Snowflake/snowflake-arctic-embed-m-v2.0" }
+
+  # Sentence-Transformers classics
+  - { backend: dense, venv: .venv, model: "sentence-transformers/LaBSE" }
+  - { backend: dense, venv: .venv, model: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2" }
+
+  # VoyageAI HF mirror
+  - { backend: dense, venv: .venv, model: "voyageai/voyage-4-nano" }
+
+  # Perplexity (PPLX-4B was paper's compact-only)
+  - { backend: dense, venv: .venv, model: "perplexity-ai/pplx-embed-v1-0.6b" }
+  - { backend: dense, venv: .venv, model: "perplexity-ai/pplx-embed-v1-4b", datasets: [mlqa, xquad] }
+
+  # ============== Dense — GTE / jina-v3 venv (.venv-gte) ==============
+  - { backend: dense, venv: .venv-gte, model: "Alibaba-NLP/gte-multilingual-base" }
+  - { backend: dense, venv: .venv-gte, model: "Alibaba-NLP/gte-Qwen2-1.5B-instruct" }
+  - { backend: dense, venv: .venv-gte, model: "Alibaba-NLP/gte-Qwen2-7B-instruct" }
+  - { backend: dense, venv: .venv-gte, model: "jinaai/jina-embeddings-v3" }
+
+  # ============== Sparse / Late-Interaction (.venv-colbert-sparse) ==============
+  - { backend: bm25,       venv: .venv-colbert-sparse, model: "bm25" }
+  - { backend: opensearch, venv: .venv-colbert-sparse, model: "opensearch_neural_sparse" }
+  - { backend: colbert, venv: .venv-colbert-sparse, model: "jina_colbert_v2",   variant: jina }
+  - { backend: colbert, venv: .venv-colbert-sparse, model: "lfm2_colbert_350m", variant: lfm2 }

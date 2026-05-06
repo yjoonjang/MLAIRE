@@ -1,7 +1,20 @@
+"""Standard retrieval-metric aggregation.
+
+LPR (Language Preference Rate) and the ``lpr_confusion_matrix`` diagnostic
+are deliberately NOT computed here. LPR is
+
+    LPR(q) = 1 if argmax_{p in group(q)} score(q, p) has same language as q
+
+i.e. it is computed *over the entire relevant group*, regardless of the
+top-k retrieval cutoff this evaluator operates on. Mixing it in here would
+make the value silently top-k dependent. Use the dedicated scripts under
+``measure_lpr/`` (e.g. ``measure_lpr/queue_runner.py``) to compute LPR and
+the language confusion matrix correctly.
+"""
+
 from collections import defaultdict
 
 from mlaire.types import Query
-from mlaire.metrics.lpr import compute_lpr
 from mlaire.metrics.mrr import compute_mrr, compute_lang_mrr
 from mlaire.metrics.ndcg import compute_ndcg, compute_lang_ndcg
 from mlaire.metrics.recall import compute_recall, compute_lang_recall
@@ -32,8 +45,7 @@ class Evaluator:
         all_ndcg: dict[int, list[float]] = {k: [] for k in self.k_values}
         all_recall: dict[int, list[float]] = {k: [] for k in self.k_values}
 
-        # Language-aware metrics
-        all_lpr = []
+        # Language-aware metrics (excluding LPR — see module docstring)
         all_lang_mrr = []
         all_lang_ndcg: dict[int, list[float]] = {k: [] for k in self.k_values}
         all_lang_recall: dict[int, list[float]] = {k: [] for k in self.k_values}
@@ -43,16 +55,10 @@ class Evaluator:
         score_dist_per_k: dict[int, dict[int, int]] = {
             k: {3: 0, 2: 0, 1: 0, 0: 0} for k in self.k_values
         }
-        # LPR confusion matrix: {query_lang: {first_relevant_lang: count}} over all
-        # queries where a relevant passage exists in the ranked list. Diagonal counts
-        # LPR=1 events; off-diagonal counts LPR=0 events and records *which* language
-        # the first relevant passage belonged to.
-        lpr_confusion: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
 
         def _make_metrics() -> dict[str, list[float]]:
             return {
                 "mrr": [],
-                "lpr": [],
                 "lang_mrr": [],
                 **{f"ndcg@{k}": [] for k in self.k_values},
                 **{f"recall@{k}": [] for k in self.k_values},
@@ -70,21 +76,14 @@ class Evaluator:
             dataset = query.dataset
             total_relevant = group_counts.get(gid) if group_counts else None
 
-            # Standard metrics (language-agnostic)
             mrr = compute_mrr(ranked, qlang, gid)
-            all_mrr.append(mrr)
-
-            # Language-aware metrics
-            lpr = compute_lpr(ranked, qlang, gid)
             lang_mrr = compute_lang_mrr(ranked, qlang, gid)
-            all_lpr.append(lpr)
+            all_mrr.append(mrr)
             all_lang_mrr.append(lang_mrr)
 
             per_language[qlang]["mrr"].append(mrr)
-            per_language[qlang]["lpr"].append(lpr)
             per_language[qlang]["lang_mrr"].append(lang_mrr)
             per_dataset[dataset]["mrr"].append(mrr)
-            per_dataset[dataset]["lpr"].append(lpr)
             per_dataset[dataset]["lang_mrr"].append(lang_mrr)
 
             for k in self.k_values:
@@ -110,7 +109,8 @@ class Evaluator:
                 per_dataset[dataset][f"lang_ndcg@{k}"].append(l_ndcg)
                 per_dataset[dataset][f"lang_recall@{k}"].append(l_recall)
 
-            # Diagnostics
+            # Diagnostics — top-1 4-way classification + lang_fail confusion +
+            # top-k score distribution. None of these are LPR-derived.
             if ranked:
                 failure = classify_failure(ranked[0], qlang, gid)
                 failure_counts[failure] += 1
@@ -119,14 +119,6 @@ class Evaluator:
                         "query_lang": qlang,
                         "retrieved_lang": ranked[0][2],
                     })
-
-                # LPR confusion: language of the first relevant passage in the ranked list
-                first_relevant_lang = next(
-                    (lang for _, group_id, lang, _ in ranked if group_id == gid),
-                    None,
-                )
-                if first_relevant_lang is not None:
-                    lpr_confusion[qlang][first_relevant_lang] += 1
 
             for k in self.k_values:
                 dist = compute_score_distribution(ranked, qlang, gid, k)
@@ -144,8 +136,7 @@ class Evaluator:
         per_lang_avg = {lang: _avg_metrics(m) for lang, m in per_language.items()}
         per_dataset_avg = {ds: _avg_metrics(m) for ds, m in per_dataset.items()}
 
-        # Aggregate: macro-average across datasets (equal weight per dataset)
-        metric_names = ["mrr", "lpr", "lang_mrr"]
+        metric_names = ["mrr", "lang_mrr"]
         for k in self.k_values:
             metric_names += [f"ndcg@{k}", f"recall@{k}", f"lang_ndcg@{k}", f"lang_recall@{k}"]
 
@@ -159,9 +150,6 @@ class Evaluator:
         diagnostics = {
             "failure_types": {k: v / total for k, v in failure_counts.items()},
             "confusion_matrix": compute_confusion_matrix(lang_fail_cases),
-            "lpr_confusion_matrix": {
-                ql: dict(tgts) for ql, tgts in lpr_confusion.items()
-            },
             "score_distribution": {
                 f"top_{k}": score_dist_per_k[k] for k in self.k_values
             },
