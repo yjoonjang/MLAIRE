@@ -1,0 +1,472 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "arrayShape": "cr:arrayShape",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "containedIn": "cr:containedIn",
+    "cr": "http://mlcommons.org/croissant/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataBiases": "cr:dataBiases",
+    "dataCollection": "cr:dataCollection",
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "dct": "http://purl.org/dc/terms/",
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isArray": "cr:isArray",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "personalSensitiveInformation": "cr:personalSensitiveInformation",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "rai": "http://mlcommons.org/croissant/RAI/"
+  },
+  "@type": "sc:Dataset",
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "repo",
+      "name": "repo",
+      "description": "The Hugging Face git repository.",
+      "contentUrl": "https://huggingface.co/datasets/nlpai-lab/mlaire-mlqa/tree/refs%2Fconvert%2Fparquet",
+      "encodingFormat": "git+https",
+      "sha256": "https://github.com/mlcommons/croissant/issues/80"
+    },
+    {
+      "@type": "cr:FileSet",
+      "@id": "parquet-files-for-config-corpus",
+      "containedIn": {
+        "@id": "repo"
+      },
+      "encodingFormat": "application/x-parquet",
+      "includes": "corpus/*/*.parquet"
+    },
+    {
+      "@type": "cr:FileSet",
+      "@id": "parquet-files-for-config-qrels",
+      "containedIn": {
+        "@id": "repo"
+      },
+      "encodingFormat": "application/x-parquet",
+      "includes": "qrels/*/*.parquet"
+    },
+    {
+      "@type": "cr:FileSet",
+      "@id": "parquet-files-for-config-queries",
+      "containedIn": {
+        "@id": "repo"
+      },
+      "encodingFormat": "application/x-parquet",
+      "includes": "queries/*/*.parquet"
+    }
+  ],
+  "recordSet": [
+    {
+      "@type": "cr:RecordSet",
+      "dataType": "cr:Split",
+      "key": {
+        "@id": "corpus_splits/split_name"
+      },
+      "@id": "corpus_splits",
+      "name": "corpus_splits",
+      "description": "Splits for the corpus config.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "corpus_splits/split_name",
+          "dataType": "sc:Text"
+        }
+      ],
+      "data": [
+        {
+          "corpus_splits/split_name": "test"
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "corpus",
+      "description": "nlpai-lab/mlaire-mlqa - 'corpus' subset",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "corpus/split",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-corpus"
+            },
+            "extract": {
+              "fileProperty": "fullpath"
+            },
+            "transform": {
+              "regex": "corpus/(?:partial-)?(test)/.+parquet$"
+            }
+          },
+          "references": {
+            "field": {
+              "@id": "corpus_splits/split_name"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "corpus/_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-corpus"
+            },
+            "extract": {
+              "column": "_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "corpus/text",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-corpus"
+            },
+            "extract": {
+              "column": "text"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "corpus/title",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-corpus"
+            },
+            "extract": {
+              "column": "title"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "corpus/language",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-corpus"
+            },
+            "extract": {
+              "column": "language"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "corpus/group_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-corpus"
+            },
+            "extract": {
+              "column": "group_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "corpus/dataset",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-corpus"
+            },
+            "extract": {
+              "column": "dataset"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "dataType": "cr:Split",
+      "key": {
+        "@id": "qrels_splits/split_name"
+      },
+      "@id": "qrels_splits",
+      "name": "qrels_splits",
+      "description": "Splits for the qrels config.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "qrels_splits/split_name",
+          "dataType": "sc:Text"
+        }
+      ],
+      "data": [
+        {
+          "qrels_splits/split_name": "test"
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "qrels",
+      "description": "nlpai-lab/mlaire-mlqa - 'qrels' subset",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "qrels/split",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-qrels"
+            },
+            "extract": {
+              "fileProperty": "fullpath"
+            },
+            "transform": {
+              "regex": "qrels/(?:partial-)?(test)/.+parquet$"
+            }
+          },
+          "references": {
+            "field": {
+              "@id": "qrels_splits/split_name"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "qrels/query-id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-qrels"
+            },
+            "extract": {
+              "column": "query-id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "qrels/corpus-id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-qrels"
+            },
+            "extract": {
+              "column": "corpus-id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "qrels/score",
+          "dataType": "cr:Int64",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-qrels"
+            },
+            "extract": {
+              "column": "score"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "dataType": "cr:Split",
+      "key": {
+        "@id": "queries_splits/split_name"
+      },
+      "@id": "queries_splits",
+      "name": "queries_splits",
+      "description": "Splits for the queries config.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "queries_splits/split_name",
+          "dataType": "sc:Text"
+        }
+      ],
+      "data": [
+        {
+          "queries_splits/split_name": "test"
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "queries",
+      "description": "nlpai-lab/mlaire-mlqa - 'queries' subset",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "queries/split",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-queries"
+            },
+            "extract": {
+              "fileProperty": "fullpath"
+            },
+            "transform": {
+              "regex": "queries/(?:partial-)?(test)/.+parquet$"
+            }
+          },
+          "references": {
+            "field": {
+              "@id": "queries_splits/split_name"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "queries/_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-queries"
+            },
+            "extract": {
+              "column": "_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "queries/text",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-queries"
+            },
+            "extract": {
+              "column": "text"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "queries/language",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-queries"
+            },
+            "extract": {
+              "column": "language"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "queries/group_id",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-queries"
+            },
+            "extract": {
+              "column": "group_id"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "queries/dataset",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "parquet-files-for-config-queries"
+            },
+            "extract": {
+              "column": "dataset"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "conformsTo": [
+    "http://mlcommons.org/croissant/1.1",
+    "http://mlcommons.org/croissant/RAI/1.0"
+  ],
+  "name": "mlaire-mlqa",
+  "description": "\n\t\n\t\t\n\t\n\t\n\t\tMLAIRE-MLQA\n\t\n\nMLQA reformatted for language-aware retrieval evaluation. Passages are deduplicated at the context level via union-find on the original MLQA ids. Relevance is encoded by group_id matching.\nThis repository is part of the MLAIRE benchmark (NeurIPS 2026\nEvaluations & Datasets Track). Evaluation code: https://github.com/yjoonjang/MLAIRE\n\n\t\n\t\t\n\t\n\t\n\t\tDefault top-k\n\t\n\nReported metrics in the paper use top-20.\n\n\t\n\t\t\n\t\n\t\n\t\tLayout\n\t\n\ncorpus/test-*.parquet      _id, text, title… See the full description on the dataset page: https://huggingface.co/datasets/nlpai-lab/mlaire-mlqa.",
+  "alternateName": [
+    "nlpai-lab/mlaire-mlqa",
+    "MLAIRE-MLQA"
+  ],
+  "creator": {
+    "@type": "Organization",
+    "name": "NLP & AI - Korea University",
+    "url": "https://huggingface.co/nlpai-lab"
+  },
+  "keywords": [
+    "text-retrieval",
+    "multilingual",
+    "English",
+    "Arabic",
+    "German",
+    "Spanish",
+    "Hindi",
+    "Vietnamese",
+    "Chinese",
+    "cc-by-sa-3.0",
+    "🇺🇸 Region: US",
+    "retrieval",
+    "multilingual",
+    "language-aware-ir",
+    "benchmark",
+    "beir",
+    "mlaire"
+  ],
+  "license": "CC BY-SA 3.0",
+  "url": "https://huggingface.co/datasets/nlpai-lab/mlaire-mlqa",
+  "citeAs": "@inproceedings{jang2026mlaire, title={{MLAIRE}: Multilingual Language-Aware Information Retrieval Evaluation Protocol}, author={Jang, Youngjoon and Hong, Seongtae and Moon, Hyeonseok and Lim, Heuiseok}, booktitle={Advances in Neural Information Processing Systems (NeurIPS), Evaluations and Datasets Track}, year={2026}}",
+  "version": "1.0.0",
+  "datePublished": "2026-11-03",
+  "rai:hasSyntheticData": false,
+  "rai:dataCollection": "Reorganized from the public MLQA (Lewis et al., 2020) release without new annotation. Passages expressing the same content in different languages are grouped into content groups; every query is linked to its content group, and each passage and query keeps its language label.",
+  "rai:dataCollectionType": [
+    "Secondary Data Analysis"
+  ],
+  "rai:dataPreprocessingProtocol": "Passages and queries are taken verbatim from the source release and exported in BEIR format (corpus, queries, qrels). Relevance is binary group membership.",
+  "rai:dataUseCases": "Evaluating multilingual retrievers on cross-lingual semantic retrieval and on query-language preference (LPR, Lang-nDCG, top-1 4-way decomposition).",
+  "rai:dataLimitations": "QA-style parallel passages may not represent open-domain mixed-language corpora. Language coverage is uneven across families, scripts, and resource levels. Query-language preference is not a universal utility measure.",
+  "rai:dataBiases": "High-resource languages and translated benchmark content may be overrepresented relative to naturally occurring multilingual search.",
+  "rai:personalSensitiveInformation": "None added. Content is inherited from the public source dataset.",
+  "rai:dataSocialImpact": "Intended as a diagnostic for whether retrievers return evidence in the query language. Optimizing language preference in isolation may hide more complete cross-lingual evidence. Source license: CC BY-SA 3.0; follow its attribution and share-alike terms."
+}
