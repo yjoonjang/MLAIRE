@@ -8,7 +8,7 @@ the RAI fields below.
 Usage:
     python scripts/make_croissant.py \\
         --repo <hf-user>/mlaire-mlqa --dataset mlqa \\
-        --output croissant/mlaire-mlqa.json
+        --output croissant/mlaire-mlqa.json --date-published 2026-11-03
 """
 
 import argparse
@@ -19,6 +19,12 @@ from pathlib import Path
 CROISSANT_URL = "https://huggingface.co/api/datasets/{repo}/croissant"
 RAI_CONTEXT = "http://mlcommons.org/croissant/RAI/"
 RAI_SPEC = "http://mlcommons.org/croissant/RAI/1.0"
+CITATION = (
+    "@inproceedings{jang2026mlaire, title={{MLAIRE}: Multilingual Language-Aware Information "
+    "Retrieval Evaluation Protocol}, author={Jang, Youngjoon and Hong, Seongtae and Moon, Hyeonseok "
+    "and Lim, Heuiseok}, booktitle={Advances in Neural Information Processing Systems (NeurIPS), "
+    "Evaluations and Datasets Track}, year={2026}}"
+)
 
 SOURCES = {
     "mlqa": ("MLQA (Lewis et al., 2020)", "CC BY-SA 3.0"),
@@ -72,6 +78,8 @@ def main() -> None:
     ap.add_argument("--repo", required=True, help="Hugging Face dataset repo id")
     ap.add_argument("--dataset", required=True, choices=sorted(SOURCES))
     ap.add_argument("--output", required=True)
+    ap.add_argument("--version", default="1.0.0")
+    ap.add_argument("--date-published", required=True, help="release date, YYYY-MM-DD")
     args = ap.parse_args()
 
     with urllib.request.urlopen(CROISSANT_URL.format(repo=args.repo), timeout=60) as r:
@@ -82,6 +90,9 @@ def main() -> None:
     conforms = [conforms] if isinstance(conforms, str) else list(conforms)
     doc["conformsTo"] = conforms + [RAI_SPEC]
     doc["license"] = SOURCES[args.dataset][1]
+    doc["citeAs"] = CITATION
+    doc["version"] = args.version
+    doc["datePublished"] = args.date_published
     doc.update(rai_fields(args.dataset))
 
     out = Path(args.output)
