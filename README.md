@@ -1,27 +1,56 @@
+<div align="center">
+
 # MLAIRE
 
-**M**ulti**L**ingual Language-**A**ware **I**nformation **R**etrieval **E**valuation
-protocol: official code for the NeurIPS 2026 Evaluations & Datasets Track paper
-*MLAIRE: Multilingual Language-Aware Information Retrieval Evaluation Protocol*.
+### MLAIRE: Multilingual Language-Aware Information Retrieval Evaluation Protocol
 
-`MLAIRE` provides a unified, language-aware retrieval benchmark over three
-multilingual question–answering corpora (MLQA, XQuAD, Belebele) and reports
-both standard IR metrics (MRR, nDCG, Recall) and language-aware variants
-(LPR, Lang-MRR, Lang-nDCG, Lang-Recall) along with the top-1 4-way failure
-decomposition (perfect / lang_fail / sem_fail / both_fail).
+[![NeurIPS 2026](https://img.shields.io/badge/NeurIPS%202026-Evaluations%20%26%20Datasets%20Track-8A2BE2.svg)](https://neurips.cc/Conferences/2026)
+[![arXiv](https://img.shields.io/badge/arXiv-2605.07249-b31b1b.svg)](https://arxiv.org/abs/2605.07249)
+[![Code License: MIT](https://img.shields.io/badge/Code-MIT-green.svg)](LICENSE)
+[![Data License: CC BY-SA](https://img.shields.io/badge/Data-CC%20BY--SA-lightgrey.svg)](#license)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
+[![Datasets](https://img.shields.io/badge/🤗%20HuggingFace-Datasets-yellow.svg)](https://huggingface.co/collections/yjoonjang/mlaire)
+
+<img src="assets/ndcg_vs_lpr.png" width="60%" alt="Average nDCG vs. Language Preference Rate across 33 retrievers" />
+
+<b>Official implementation of the <a href="https://neurips.cc/Conferences/2026">NeurIPS 2026</a> (Evaluations &amp; Datasets Track) paper.</b>
+
+</div>
 
 ---
 
-## 1. Datasets
+## News
 
-The three benchmarks are hosted as MTEB-style multi-config Hugging Face
-datasets:
+- **2026-11** · MLAIRE is accepted to **NeurIPS 2026** (Evaluations & Datasets Track). Code, [datasets](https://huggingface.co/collections/yjoonjang/mlaire), and Croissant metadata are public.
+- **2026-05** · Paper released on [arXiv](https://arxiv.org/abs/2605.07249).
 
-| Dataset  | Repo                                                    | Languages | Default top-k |
-|----------|---------------------------------------------------------|----------:|--------------:|
-| MLQA     | `nlpai-lab/mlaire-mlqa`                 |         7 |            20 |
-| XQuAD    | `nlpai-lab/mlaire-xquad`                |        12 |            20 |
-| Belebele | `nlpai-lab/mlaire-belebele`             |       122 |           200 |
+## Overview
+
+Multilingual retrieval is usually evaluated with language-agnostic relevance: every language version of the
+relevant passage counts as equally correct. Retrieval utility, however, also depends on the *language* of the
+retrieved passage, since users read and verify evidence in the language of their query and RAG generators answer
+more accurately when the evidence matches the query language.
+
+MLAIRE builds candidate pools in which semantically equivalent passages coexist across languages (MLQA, XQuAD,
+Belebele), so a single run measures both axes:
+
+- **Language Preference Rate (LPR)**: how often the query-language version of the target content scores above
+  its translations.
+- **Lang-nDCG / Lang-Recall**: ranking metrics that give the query-language relevant passage more gain than its
+  translations.
+- **Top-1 4-way decomposition**: `perfect` / `lang_fail` / `sem_fail` / `both_fail` for the rank-1 result.
+
+Across **33** dense, sparse, and late-interaction retrievers, standard nDCG does not reliably predict LPR:
+semantically strong retrievers often return the right content in another language, while language-preserving
+retrievers can return same-language passages with the wrong content (figure above).
+
+## Datasets
+
+| Dataset  | Hugging Face repo | Languages | Queries | Passages | Default top-k |
+|----------|-------------------|----------:|--------:|---------:|--------------:|
+| MLQA     | [`nlpai-lab/mlaire-mlqa`](https://huggingface.co/datasets/nlpai-lab/mlaire-mlqa)         |   7 |  42,245 | 35,145 |  20 |
+| XQuAD    | [`nlpai-lab/mlaire-xquad`](https://huggingface.co/datasets/nlpai-lab/mlaire-xquad)       |  12 |  14,280 |  2,880 |  20 |
+| Belebele | [`nlpai-lab/mlaire-belebele`](https://huggingface.co/datasets/nlpai-lab/mlaire-belebele) | 122 | 109,800 | 59,536 | 200 |
 
 Each repo exposes three configs that load directly with `datasets.load_dataset`:
 
@@ -47,9 +76,9 @@ relevant iff their `group_id` agrees. Because every row carries an explicit
 decomposition are reconstructable at evaluation time from the binary qrels
 alone.
 
----
+Croissant metadata with Responsible AI fields for each dataset is in [`croissant/`](croissant).
 
-## 2. Environment setup
+## Installation
 
 Different model families require different transformers runtimes. Three
 pinned environments are provided as shell scripts under `setup/`. They
@@ -81,15 +110,12 @@ venv scripts install):
 .venv/bin/pip install -e .
 ```
 
----
+## Evaluation
 
-## 3. Running an evaluation
+The entry point is the `mlaire` CLI. All configs fetch the data from the Hugging Face Hub; no manual download is
+needed.
 
-The entry point is the `mlaire` CLI. All configs assume the data is
-fetched from the Hugging Face Hub repos listed above; no manual download
-is needed.
-
-### 3.1 Dense embedders
+### Dense embedders
 
 ```bash
 # MLQA — top-20
@@ -128,7 +154,7 @@ embedders, jina-v3) should be run from the alternative environment:
     --model Alibaba-NLP/gte-multilingual-base
 ```
 
-### 3.2 Sparse retrievers (BM25, OpenSearch neural-sparse, BGE-M3 sparse)
+### Sparse retrievers (BM25, OpenSearch neural-sparse, BGE-M3 sparse)
 
 ```bash
 .venv-colbert-sparse/bin/python sparse/bm25_eval.py \
@@ -145,7 +171,7 @@ embedders, jina-v3) should be run from the alternative environment:
     --output results/bge_m3_sparse_mlqa.json
 ```
 
-### 3.3 Late-interaction (ColBERT)
+### Late-interaction (ColBERT)
 
 ```bash
 .venv-colbert-sparse/bin/python colbert/jina_colbert_eval.py \
@@ -173,7 +199,7 @@ the GPU instead of a PLAID index. On Belebele, bound GPU memory with
     --output results/bge_m3_colbert_belebele.json
 ```
 
-### 3.4 Output
+### Output
 
 Every evaluation writes a single JSON file with the structure
 
@@ -194,11 +220,9 @@ Every evaluation writes a single JSON file with the structure
 LPR (Language Preference Rate) and the language-confusion matrix it
 implies are deliberately *not* included here — they need a different
 algorithm (full group-wise score access, top-k independent) and are
-computed by a separate pipeline; see [§ 5 below](#5-language-preference-rate-lpr).
+computed by a separate pipeline; see [Language Preference Rate (LPR)](#language-preference-rate-lpr).
 
----
-
-## 4. Configuration reference
+### Configuration
 
 Each YAML in `mlaire/configs/` is a small declarative file:
 
@@ -219,9 +243,7 @@ default of `2 * max(k_values)` is sometimes too shallow and the
 ship-with-config values (200 / 200 / 2000) match the rank depth used to
 produce the canonical paper numbers.
 
----
-
-## 5. Language Preference Rate (LPR)
+## Language Preference Rate (LPR)
 
 LPR for a query *q* is
 
@@ -236,7 +258,7 @@ makes the headline number vary with the cutoff. We therefore compute
 LPR in a dedicated pipeline under `measure_lpr/` rather than mixing it
 into `mlaire eval`.
 
-### 5.1 One model
+### One model
 
 ```bash
 # dense embedder
@@ -275,7 +297,7 @@ Output lands at `measure_lpr/results/{dataset}/{model_safe}.json`:
 }
 ```
 
-### 5.2 Many models on N GPUs
+### Many models on N GPUs
 
 The full set of paper-canonical models is declared in `measure_lpr/jobs.yaml`
 together with the venv each one needs. The queue runner expands the file
@@ -293,9 +315,7 @@ For multi-server runs the queue can be sharded deterministically by
 ``--shard SPEC/N`` so two boxes never pick the same `(model, dataset)`
 pair; see the `queue_runner.py` docstring for the shard syntax.
 
----
-
-## 6. Reproducing the paper
+## Reproducing the paper
 
 A representative paper number can be reproduced end to end with no
 additional arguments:
@@ -317,11 +337,9 @@ reproduction has been verified for MLQA and XQuAD on
 
 LPR and the language-confusion analyses (the LPR columns of Table 2, the
 per-language LPR of Table 3, and the macro-group heatmap of Figure 4) are
-reproduced via `measure_lpr/` (see § 5).
+reproduced via `measure_lpr/` (see [LPR](#language-preference-rate-lpr)).
 
----
-
-## 7. Optional: regenerate data locally
+### Regenerating the data locally
 
 If you would rather not depend on the Hugging Face Hub at all, the
 canonical loaders can rederive the BEIR files from the upstream MLQA /
@@ -340,32 +358,92 @@ XQuAD / Belebele datasets:
     --data-dir ./data
 ```
 
----
+## Results
 
-## 8. Released results
+<details>
+<summary>Main results for all 33 retrievers (Table 2 of the paper; values ×100)</summary>
 
-`results/` contains the evaluation outputs for the two BGE-M3 heads added in
-the camera-ready version (`bge_m3_sparse_{mlqa,xquad,belebele}.json`,
-`bge_m3_colbert_xquad.json`), produced with the commands in § 3.2 and § 3.3.
+| Paradigm | Model | MLQA nDCG@20 | MLQA LPR | XQuAD nDCG@20 | XQuAD LPR | Belebele nDCG@200 | Belebele LPR |
+|---|---|--:|--:|--:|--:|--:|--:|
+| Dense | Qwen3-Embedding-8B | 68.64 | 53.00 | 92.38 | 76.46 | 74.35 | 73.22 |
+| Dense | Qwen3-Embedding-4B | 66.05 | 52.30 | 91.57 | 73.92 | 62.58 | 65.09 |
+| Dense | Qwen3-Embedding-0.6B | 55.16 | 53.65 | 79.44 | 72.78 | 43.09 | 53.82 |
+| Dense | llama-embed-nemotron-8b | 68.31 | 64.55 | 94.37 | 83.91 | 64.68 | 71.10 |
+| Dense | llama-nemotron-embed-1b-v2 | 63.61 | 63.99 | 94.56 | 84.11 | 38.98 | 72.15 |
+| Dense | pplx-embed-v1-4b | 67.07 | 46.65 | 94.94 | 51.51 | 58.12 | 25.59 |
+| Dense | pplx-embed-v1-0.6b | 61.54 | 58.06 | 89.57 | 72.11 | 49.31 | 43.09 |
+| Dense | jina-embeddings-v5-small | 62.07 | 49.55 | 90.67 | 65.47 | 58.85 | 51.63 |
+| Dense | jina-embeddings-v5-nano | 61.25 | 48.42 | 90.13 | 67.18 | 55.81 | 53.26 |
+| Dense | jina-embeddings-v3 | 28.72 | 42.00 | 68.96 | 36.65 | 29.20 | 24.98 |
+| Dense | gte-Qwen2-7B-instruct | 60.34 | 57.98 | 88.93 | 59.16 | 58.20 | 34.72 |
+| Dense | gte-Qwen2-1.5B-instruct | 51.27 | 80.78 | 76.66 | 93.08 | 38.67 | 66.11 |
+| Dense | gte-multilingual-base | 54.12 | 51.82 | 83.31 | 53.77 | 62.37 | 18.04 |
+| Dense | snowflake-arctic-embed-l-v2.0 | 54.97 | 63.79 | 85.31 | 78.62 | 49.71 | 58.52 |
+| Dense | snowflake-arctic-embed-m-v2.0 | 45.14 | 71.93 | 65.56 | 86.41 | 29.48 | 68.23 |
+| Dense | multilingual-e5-large | 42.63 | 96.15 | 69.92 | 99.92 | 42.40 | 62.76 |
+| Dense | multilingual-e5-base | 40.23 | 94.73 | 61.68 | 99.68 | 35.68 | 62.10 |
+| Dense | multilingual-e5-small | 35.97 | 95.91 | 51.11 | 99.73 | 23.66 | 44.14 |
+| Dense | harrier-oss-v1-0.6b | 43.77 | 95.66 | 62.60 | 99.75 | 33.00 | 81.70 |
+| Dense | harrier-oss-v1-270m | 42.48 | 94.17 | 60.61 | 99.56 | 32.55 | 80.99 |
+| Dense | voyage-4-nano | 62.54 | 52.86 | 91.89 | 57.84 | 63.43 | 37.41 |
+| Dense | embeddinggemma-300m | 61.22 | 67.44 | 86.85 | 86.35 | 49.06 | 53.22 |
+| Dense | bge-m3 | 56.65 | 53.79 | 88.06 | 64.42 | 59.41 | 39.25 |
+| Dense | nomic-embed-text-v2-moe | 52.89 | 67.59 | 82.36 | 82.01 | 45.12 | 64.86 |
+| Dense | granite-embedding-278m | 43.56 | 58.36 | 70.38 | 64.49 | 35.14 | 44.14 |
+| Dense | paraphrase-multilingual-MiniLM | 34.92 | 36.88 | 70.55 | 23.47 | 24.13 | 11.63 |
+| Dense | LaBSE | 28.41 | 37.53 | 64.70 | 24.03 | 42.18 | 8.96 |
+| Sparse | opensearch-neural-sparse-v1 | 29.98 | 91.03 | 29.19 | 95.24 | 15.90 | 71.66 |
+| Sparse | BM25 (XLM-R tokenizer) | 27.92 | 93.68 | 23.31 | 98.75 | 7.27 | 89.76 |
+| Sparse | bge-m3-sparse | 33.69 | 87.77 | 33.47 | 96.02 | 19.86 | 74.86 |
+| Late-Interaction | jina-colbert-v2 | 62.09 | 60.42 | 89.42 | 79.10 | 44.70 | 66.93 |
+| Late-Interaction | LFM2-ColBERT-350M | 39.48 | 90.73 | 32.74 | 98.41 | 10.06 | 87.75 |
+| Late-Interaction | bge-m3-colbert | 61.74 | 62.02 | 90.90 | 79.75 | 59.69 | 53.07 |
 
----
+Lang-nDCG, Recall, and Lang-Recall are reported in the paper. `results/` contains the raw outputs for the two
+BGE-M3 heads added in the camera-ready version.
 
-## 9. License
+</details>
 
-The code is released under the MIT License (see `LICENSE`). The datasets are
-derived from MLQA (CC BY-SA 3.0), XQuAD (CC BY-SA 4.0), and Belebele
-(CC BY-SA 4.0) and are redistributed under the same licenses; please follow
-their attribution and share-alike terms.
+## Released artifacts
 
----
+| Artifact | Link |
+|---|---|
+| MLAIRE datasets (collection) | [yjoonjang/mlaire](https://huggingface.co/collections/yjoonjang/mlaire) |
+| MLQA / XQuAD / Belebele | [nlpai-lab/mlaire-mlqa](https://huggingface.co/datasets/nlpai-lab/mlaire-mlqa) · [nlpai-lab/mlaire-xquad](https://huggingface.co/datasets/nlpai-lab/mlaire-xquad) · [nlpai-lab/mlaire-belebele](https://huggingface.co/datasets/nlpai-lab/mlaire-belebele) |
+| Croissant metadata (RAI) | [`croissant/`](croissant) |
+| BGE-M3 sparse / ColBERT results | [`results/`](results) |
 
-## 10. Citation
+## Project structure
+
+```
+├── mlaire/                 # package: CLI, data loaders, evaluator, metrics, dense model wrappers
+│   ├── configs/            # mlqa.yaml, xquad.yaml, belebele.yaml
+│   ├── data/               # BEIR / canonical loaders, pool builder
+│   ├── evaluation/         # evaluator, retriever, top-1 diagnostics
+│   └── metrics/            # MRR, nDCG (+ Lang-nDCG), Recall (+ Lang-Recall)
+├── sparse/                 # BM25, OpenSearch neural-sparse, BGE-M3 sparse
+├── colbert/                # jina-colbert-v2, LFM2-ColBERT (PLAID), BGE-M3 ColBERT (exact MaxSim)
+├── measure_lpr/            # group-level LPR pipeline + multi-GPU queue runner
+├── scripts/                # data export / upload / verification, Croissant generation
+├── setup/                  # uv virtual-environment scripts
+├── croissant/              # Croissant metadata with RAI fields
+└── results/                # released evaluation outputs
+```
+
+## Citation
 
 ```bibtex
 @inproceedings{jang2026mlaire,
   title     = {{MLAIRE}: Multilingual Language-Aware Information Retrieval Evaluation Protocol},
   author    = {Jang, Youngjoon and Hong, Seongtae and Moon, Hyeonseok and Lim, Heuiseok},
   booktitle = {Advances in Neural Information Processing Systems (NeurIPS), Evaluations and Datasets Track},
-  year      = {2026}
+  year      = {2026},
+  url       = {https://arxiv.org/abs/2605.07249}
 }
 ```
+
+## License
+
+The code is released under the [MIT License](LICENSE). The datasets are derived from MLQA (CC BY-SA 3.0),
+XQuAD (CC BY-SA 4.0), and Belebele (CC BY-SA 4.0) and are redistributed under the same licenses; please follow
+their attribution and share-alike terms.
