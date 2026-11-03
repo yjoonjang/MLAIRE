@@ -4,7 +4,7 @@ Reads three Hugging Face dataset configs (``corpus`` / ``queries`` /
 ``qrels``) from either:
 
   * a Hugging Face Hub repo id (e.g.
-    ``anonymous-submission-nips/mlaire-mlqa``) — files are auto-downloaded
+    ``nlpai-lab/mlaire-mlqa``) — files are auto-downloaded
     and cached by ``datasets.load_dataset``, or
   * a local directory containing the same MTEB-style layout
     (``corpus/test-*.parquet``, ``queries/test-*.parquet``,

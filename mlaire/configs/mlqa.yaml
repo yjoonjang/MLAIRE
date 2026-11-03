@@ -1,7 +1,7 @@
 # MLQA evaluation, top-20.
 #
 # Data is pulled from Hugging Face Hub by default
-# (anonymous-submission-nips/mlaire-mlqa).  Override with the top-level
+# (nlpai-lab/mlaire-mlqa).  Override with the top-level
 # ``data_dir`` field if you want to evaluate against a local export
 # (a ``mlqa`` subdirectory of ``data_dir`` will be expected).
 datasets:

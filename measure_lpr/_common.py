@@ -45,7 +45,7 @@ from mlaire.types import RetrievalPool  # noqa: E402
 # By default, fetch BEIR-format files from the public Hugging Face repos
 # that ship alongside this code. Override with --data-dir on the per-
 # backend script if you want to evaluate against a local export.
-HF_REPO_PREFIX = "anonymous-submission-nips/mlaire"
+HF_REPO_PREFIX = "nlpai-lab/mlaire"
 
 LANGS_MAP = {
     "mlqa": list(MLQA_LANGUAGES),
@@ -63,7 +63,7 @@ def load_pool(dataset: str, source: str | None = None) -> RetrievalPool:
         ``mlqa`` / ``xquad`` / ``belebele``.
     source
         Either a Hugging Face dataset repo id (e.g.
-        ``anonymous-submission-nips/mlaire-mlqa``) or a local directory
+        ``nlpai-lab/mlaire-mlqa``) or a local directory
         with the MTEB-style parquet layout. ``None`` (default) resolves
         to ``HF_REPO_PREFIX-{dataset}``.
     """

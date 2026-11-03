@@ -17,7 +17,7 @@ Usage:
     python scripts/verify_beir.py --source ./data
 
     # Verify against the uploaded HF dataset
-    python scripts/verify_beir.py --source anonymous-submission-nips/mlaire
+    python scripts/verify_beir.py --source nlpai-lab/mlaire
     # (the script appends "-<dataset>" automatically)
 """
 
@@ -103,7 +103,7 @@ def main() -> None:
     ap.add_argument(
         "--source",
         default="./data",
-        help="local data root, OR HF Hub repo prefix (e.g. anonymous-submission-nips/mlaire)",
+        help="local data root, OR HF Hub repo prefix (e.g. nlpai-lab/mlaire)",
     )
     ap.add_argument(
         "--datasets",

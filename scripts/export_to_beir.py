@@ -16,9 +16,9 @@ For each requested dataset (mlqa / xquad / belebele) this script
   3. drops a ``README.md`` whose YAML front-matter declares the configs so
      ``datasets.load_dataset`` works directly:
 
-         load_dataset("anonymous-submission-nips/mlaire-mlqa", "corpus")
-         load_dataset("anonymous-submission-nips/mlaire-mlqa", "queries")
-         load_dataset("anonymous-submission-nips/mlaire-mlqa", "qrels")
+         load_dataset("nlpai-lab/mlaire-mlqa", "corpus")
+         load_dataset("nlpai-lab/mlaire-mlqa", "queries")
+         load_dataset("nlpai-lab/mlaire-mlqa", "qrels")
 
 Run from the repo root:
 
@@ -159,6 +159,12 @@ LANG_LIST_FOR_CARD = {
 }
 
 DEFAULT_TOPK = {"mlqa": 20, "xquad": 20, "belebele": 200}
+# (HF license id, source name, license name); derivatives keep the source's share-alike license
+LICENSES = {
+    "mlqa": ("cc-by-sa-3.0", "MLQA", "CC BY-SA 3.0"),
+    "xquad": ("cc-by-sa-4.0", "XQuAD", "CC BY-SA 4.0"),
+    "belebele": ("cc-by-sa-4.0", "Belebele", "CC BY-SA 4.0"),
+}
 
 DESCRIPTIONS = {
     "mlqa": (
@@ -195,7 +201,7 @@ def _readme(name: str) -> str:
         else ""
     )
     return f"""---
-license: mit
+license: {LICENSES[name][0]}
 task_categories:
   - text-retrieval
 multilinguality: multilingual
@@ -228,9 +234,8 @@ configs:
 
 {DESCRIPTIONS[name]}
 
-This repository is part of the **MLAIRE** benchmark, submitted anonymously
-to the NeurIPS 2026 Evaluations & Datasets Track. Authors and affiliations
-are withheld for double-blind review.
+This repository is part of the **MLAIRE** benchmark (NeurIPS 2026
+Evaluations & Datasets Track). Evaluation code: https://github.com/yjoonjang/MLAIRE
 
 ## Default top-k
 
@@ -254,9 +259,9 @@ reconstructed without consulting any additional resource.
 ```python
 from datasets import load_dataset
 
-corpus  = load_dataset("anonymous-submission-nips/mlaire-{name}", "corpus",  split="test")
-queries = load_dataset("anonymous-submission-nips/mlaire-{name}", "queries", split="test")
-qrels   = load_dataset("anonymous-submission-nips/mlaire-{name}", "qrels",   split="test")
+corpus  = load_dataset("nlpai-lab/mlaire-{name}", "corpus",  split="test")
+queries = load_dataset("nlpai-lab/mlaire-{name}", "queries", split="test")
+qrels   = load_dataset("nlpai-lab/mlaire-{name}", "qrels",   split="test")
 ```
 
 Or simply install the companion package and run
@@ -270,7 +275,8 @@ report in the paper.
 
 ## License
 
-MIT (anonymous authors).
+Derived from {LICENSES[name][1]}, which is released under {LICENSES[name][2]}; this derivative is
+redistributed under the same license.
 """
 
 

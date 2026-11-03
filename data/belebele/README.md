@@ -1,5 +1,5 @@
 ---
-license: mit
+license: cc-by-sa-4.0
 task_categories:
   - text-retrieval
 multilinguality: multilingual
@@ -154,9 +154,8 @@ configs:
 
 Belebele reformatted for language-aware retrieval evaluation. 488 underlying passages, each available in 122 languages (joined globally by the original `link` field). Relevance is encoded by group_id matching.
 
-This repository is part of the **MLAIRE** benchmark, submitted anonymously
-to the NeurIPS 2026 Evaluations & Datasets Track. Authors and affiliations
-are withheld for double-blind review.
+This repository is part of the **MLAIRE** benchmark (NeurIPS 2026
+Evaluations & Datasets Track). Evaluation code: https://github.com/yjoonjang/MLAIRE
 
 ## Default top-k
 
@@ -180,9 +179,9 @@ reconstructed without consulting any additional resource.
 ```python
 from datasets import load_dataset
 
-corpus  = load_dataset("anonymous-submission-nips/mlaire-belebele", "corpus",  split="test")
-queries = load_dataset("anonymous-submission-nips/mlaire-belebele", "queries", split="test")
-qrels   = load_dataset("anonymous-submission-nips/mlaire-belebele", "qrels",   split="test")
+corpus  = load_dataset("nlpai-lab/mlaire-belebele", "corpus",  split="test")
+queries = load_dataset("nlpai-lab/mlaire-belebele", "queries", split="test")
+qrels   = load_dataset("nlpai-lab/mlaire-belebele", "qrels",   split="test")
 ```
 
 Or simply install the companion package and run
@@ -193,3 +192,8 @@ mlaire --config mlaire/configs/belebele.yaml --model <hf-model-id>
 
 which downloads these files automatically and reproduces every metric we
 report in the paper.
+
+## License
+
+Derived from Belebele, which is released under CC BY-SA 4.0; this derivative is
+redistributed under the same license.

@@ -5,7 +5,8 @@
 # Environment:
 #   Python 3.10, torch 2.8.0, transformers 4.56.2 (pulled by pylate),
 #   sentence-transformers 5.1.1 (SparseEncoder included), pylate 1.4.0,
-#   bm25s 0.3.3, ranx, flash_attn 2.8.3 (prebuilt wheel from /tmp)
+#   bm25s 0.3.3, FlagEmbedding 1.4.0 (BGE-M3 sparse / ColBERT heads), ranx,
+#   flash_attn 2.8.3 (prebuilt wheel from /tmp)
 #
 # Usage (run from project root):
 #   bash setup/venv_colbert_sparse.sh
@@ -25,6 +26,7 @@ echo "[2/4] Installing pylate + evaluation deps ..."
 uv pip install --python "$PYBIN" \
     "pylate>=1.4" \
     "bm25s" \
+    "FlagEmbedding>=1.4" \
     "rank_bm25" \
     "ranx" \
     "click" \
@@ -49,11 +51,13 @@ from sentence_transformers import SparseEncoder
 from pylate.indexes import PLAID, Voyager
 from rank_bm25 import BM25Okapi
 import bm25s
+from FlagEmbedding import BGEM3FlagModel
 print(f"torch:                  {torch.__version__}")
 print(f"transformers:           {transformers.__version__}")
 print(f"SparseEncoder:          OK")
 print(f"pylate PLAID+Voyager:   OK")
 print(f"bm25s / rank_bm25:      OK")
+print(f"FlagEmbedding BGEM3:    OK")
 try:
     import flash_attn, flash_attn_2_cuda
     print(f"flash_attn:             {flash_attn.__version__} (CUDA kernel OK)")

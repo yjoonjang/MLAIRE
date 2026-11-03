@@ -42,7 +42,7 @@ def load_pools(config: dict) -> list[tuple[str, RetrievalPool]]:
     """
     data_dir = config.get("data_dir")
     hf_repo_prefix = config.get(
-        "hf_repo_prefix", "anonymous-submission-nips/mlaire"
+        "hf_repo_prefix", "nlpai-lab/mlaire"
     )
     pools = []
     for ds_name, ds_config in config["datasets"].items():
@@ -114,7 +114,6 @@ def run_and_save(
     print(
         f"MRR: {agg['mrr']:.4f}  "
         f"NDCG@10: {agg.get('ndcg@10', 0):.4f}  "
-        f"LPR: {agg['lpr']:.4f}  "
         f"Lang-NDCG@10: {agg.get('lang_ndcg@10', 0):.4f}"
     )
     return eval_results

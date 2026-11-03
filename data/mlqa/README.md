@@ -1,5 +1,5 @@
 ---
-license: mit
+license: cc-by-sa-3.0
 task_categories:
   - text-retrieval
 multilinguality: multilingual
@@ -38,9 +38,8 @@ configs:
 
 MLQA reformatted for language-aware retrieval evaluation. Passages are deduplicated at the context level via union-find on the original MLQA ids. Relevance is encoded by group_id matching.
 
-This repository is part of the **MLAIRE** benchmark, submitted anonymously
-to the NeurIPS 2026 Evaluations & Datasets Track. Authors and affiliations
-are withheld for double-blind review.
+This repository is part of the **MLAIRE** benchmark (NeurIPS 2026
+Evaluations & Datasets Track). Evaluation code: https://github.com/yjoonjang/MLAIRE
 
 ## Default top-k
 
@@ -64,9 +63,9 @@ reconstructed without consulting any additional resource.
 ```python
 from datasets import load_dataset
 
-corpus  = load_dataset("anonymous-submission-nips/mlaire-mlqa", "corpus",  split="test")
-queries = load_dataset("anonymous-submission-nips/mlaire-mlqa", "queries", split="test")
-qrels   = load_dataset("anonymous-submission-nips/mlaire-mlqa", "qrels",   split="test")
+corpus  = load_dataset("nlpai-lab/mlaire-mlqa", "corpus",  split="test")
+queries = load_dataset("nlpai-lab/mlaire-mlqa", "queries", split="test")
+qrels   = load_dataset("nlpai-lab/mlaire-mlqa", "qrels",   split="test")
 ```
 
 Or simply install the companion package and run
@@ -77,3 +76,8 @@ mlaire --config mlaire/configs/mlqa.yaml --model <hf-model-id>
 
 which downloads these files automatically and reproduces every metric we
 report in the paper.
+
+## License
+
+Derived from MLQA, which is released under CC BY-SA 3.0; this derivative is
+redistributed under the same license.

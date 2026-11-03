@@ -1,7 +1,8 @@
 # MLAIRE
 
-**M**ulti**L**ingual **A**nonymous **I**R **E**valuation suite — code
-for the NeurIPS 2026 Evaluations & Datasets Track submission.
+**M**ulti**L**ingual Language-**A**ware **I**nformation **R**etrieval **E**valuation
+protocol: official code for the NeurIPS 2026 Evaluations & Datasets Track paper
+*MLAIRE: Multilingual Language-Aware Information Retrieval Evaluation Protocol*.
 
 `MLAIRE` provides a unified, language-aware retrieval benchmark over three
 multilingual question–answering corpora (MLQA, XQuAD, Belebele) and reports
@@ -18,18 +19,18 @@ datasets:
 
 | Dataset  | Repo                                                    | Languages | Default top-k |
 |----------|---------------------------------------------------------|----------:|--------------:|
-| MLQA     | `anonymous-submission-nips/mlaire-mlqa`                 |         7 |            20 |
-| XQuAD    | `anonymous-submission-nips/mlaire-xquad`                |        12 |            20 |
-| Belebele | `anonymous-submission-nips/mlaire-belebele`             |       122 |           200 |
+| MLQA     | `nlpai-lab/mlaire-mlqa`                 |         7 |            20 |
+| XQuAD    | `nlpai-lab/mlaire-xquad`                |        12 |            20 |
+| Belebele | `nlpai-lab/mlaire-belebele`             |       122 |           200 |
 
 Each repo exposes three configs that load directly with `datasets.load_dataset`:
 
 ```python
 from datasets import load_dataset
 
-corpus  = load_dataset("anonymous-submission-nips/mlaire-mlqa", "corpus",  split="test")
-queries = load_dataset("anonymous-submission-nips/mlaire-mlqa", "queries", split="test")
-qrels   = load_dataset("anonymous-submission-nips/mlaire-mlqa", "qrels",   split="test")
+corpus  = load_dataset("nlpai-lab/mlaire-mlqa", "corpus",  split="test")
+queries = load_dataset("nlpai-lab/mlaire-mlqa", "queries", split="test")
+qrels   = load_dataset("nlpai-lab/mlaire-mlqa", "qrels",   split="test")
 ```
 
 **Schema:**
@@ -127,7 +128,7 @@ embedders, jina-v3) should be run from the alternative environment:
     --model Alibaba-NLP/gte-multilingual-base
 ```
 
-### 3.2 Sparse retrievers (BM25, OpenSearch neural-sparse)
+### 3.2 Sparse retrievers (BM25, OpenSearch neural-sparse, BGE-M3 sparse)
 
 ```bash
 .venv-colbert-sparse/bin/python sparse/bm25_eval.py \
@@ -137,6 +138,11 @@ embedders, jina-v3) should be run from the alternative environment:
 .venv-colbert-sparse/bin/python sparse/opensearch_eval.py \
     --config mlaire/configs/xquad.yaml \
     --output results/opensearch_xquad.json
+
+# BGE-M3 sparse (lexical-weight) head
+.venv-colbert-sparse/bin/python sparse/bge_m3_sparse_eval.py \
+    --config mlaire/configs/mlqa.yaml \
+    --output results/bge_m3_sparse_mlqa.json
 ```
 
 ### 3.3 Late-interaction (ColBERT)
@@ -149,6 +155,22 @@ embedders, jina-v3) should be run from the alternative environment:
 .venv-colbert-sparse/bin/python colbert/lfm2_colbert_eval.py \
     --config mlaire/configs/mlqa.yaml \
     --output results/lfm2_colbert_350m_mlqa.json
+```
+
+The BGE-M3 ColBERT (multi-vector) head is not a PyLate model, so it is
+encoded with FlagEmbedding and retrieved by **exact** full-pool MaxSim on
+the GPU instead of a PLAID index. On Belebele, bound GPU memory with
+`--doc-group`:
+
+```bash
+.venv-colbert-sparse/bin/python colbert/bge_m3_colbert_eval.py \
+    --config mlaire/configs/xquad.yaml \
+    --output results/bge_m3_colbert_xquad.json
+
+.venv-colbert-sparse/bin/python colbert/bge_m3_colbert_eval.py \
+    --config mlaire/configs/belebele.yaml \
+    --doc-group 8000 \
+    --output results/bge_m3_colbert_belebele.json
 ```
 
 ### 3.4 Output
@@ -231,6 +253,12 @@ CUDA_VISIBLE_DEVICES=0 .venv-colbert-sparse/bin/python \
 # ColBERT (Jina-CB-v2 / LFM2-CB)
 CUDA_VISIBLE_DEVICES=0 .venv-colbert-sparse/bin/python \
     measure_lpr/compute_lpr_colbert.py --variant jina --dataset mlqa
+
+# BGE-M3 sparse / ColBERT heads
+CUDA_VISIBLE_DEVICES=0 .venv-colbert-sparse/bin/python \
+    measure_lpr/compute_lpr_bgem3sparse.py --dataset mlqa
+CUDA_VISIBLE_DEVICES=0 .venv-colbert-sparse/bin/python \
+    measure_lpr/compute_lpr_bgem3colbert.py --dataset mlqa
 ```
 
 Output lands at `measure_lpr/results/{dataset}/{model_safe}.json`:
@@ -281,15 +309,15 @@ CUDA_VISIBLE_DEVICES=0 .venv/bin/mlaire \
 
 The resulting JSON's `aggregate.ndcg@20`, `aggregate.recall@20`,
 `per_language[*].ndcg@20`, etc. are the exact numbers that underlie the
-corresponding row of Table 1 / Figure 6 in the paper. Bit-exact
+corresponding row of Table 2 in the paper. Bit-exact
 reproduction has been verified for MLQA and XQuAD on
 `intfloat/multilingual-e5-small`; Belebele agrees to better than
 1 × 10⁻⁴ on every metric (residual cuBLAS non-determinism on the larger
 60k × 110k similarity tensor).
 
-LPR and the language-confusion analyses (Figure 7, the resource-tier
-3 × 3 heatmap, the macro-areal 10 × 10 heatmap) are reproduced via
-`measure_lpr/` (see § 5).
+LPR and the language-confusion analyses (the LPR columns of Table 2, the
+per-language LPR of Table 3, and the macro-group heatmap of Figure 4) are
+reproduced via `measure_lpr/` (see § 5).
 
 ---
 
@@ -310,4 +338,34 @@ XQuAD / Belebele datasets:
 .venv/bin/mlaire --config mlaire/configs/mlqa.yaml \
     --model intfloat/multilingual-e5-small \
     --data-dir ./data
+```
+
+---
+
+## 8. Released results
+
+`results/` contains the evaluation outputs for the two BGE-M3 heads added in
+the camera-ready version (`bge_m3_sparse_{mlqa,xquad,belebele}.json`,
+`bge_m3_colbert_xquad.json`), produced with the commands in § 3.2 and § 3.3.
+
+---
+
+## 9. License
+
+The code is released under the MIT License (see `LICENSE`). The datasets are
+derived from MLQA (CC BY-SA 3.0), XQuAD (CC BY-SA 4.0), and Belebele
+(CC BY-SA 4.0) and are redistributed under the same licenses; please follow
+their attribution and share-alike terms.
+
+---
+
+## 10. Citation
+
+```bibtex
+@inproceedings{jang2026mlaire,
+  title     = {{MLAIRE}: Multilingual Language-Aware Information Retrieval Evaluation Protocol},
+  author    = {Jang, Youngjoon and Hong, Seongtae and Moon, Hyeonseok and Lim, Heuiseok},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS), Evaluations and Datasets Track},
+  year      = {2026}
+}
 ```

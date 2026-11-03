@@ -1,5 +1,5 @@
 ---
-license: mit
+license: cc-by-sa-4.0
 task_categories:
   - text-retrieval
 multilinguality: multilingual
@@ -43,9 +43,8 @@ configs:
 
 XQuAD reformatted for language-aware retrieval evaluation. Each passage appears once per language; relevance is encoded by group_id matching.
 
-This repository is part of the **MLAIRE** benchmark, submitted anonymously
-to the NeurIPS 2026 Evaluations & Datasets Track. Authors and affiliations
-are withheld for double-blind review.
+This repository is part of the **MLAIRE** benchmark (NeurIPS 2026
+Evaluations & Datasets Track). Evaluation code: https://github.com/yjoonjang/MLAIRE
 
 ## Default top-k
 
@@ -69,9 +68,9 @@ reconstructed without consulting any additional resource.
 ```python
 from datasets import load_dataset
 
-corpus  = load_dataset("anonymous-submission-nips/mlaire-xquad", "corpus",  split="test")
-queries = load_dataset("anonymous-submission-nips/mlaire-xquad", "queries", split="test")
-qrels   = load_dataset("anonymous-submission-nips/mlaire-xquad", "qrels",   split="test")
+corpus  = load_dataset("nlpai-lab/mlaire-xquad", "corpus",  split="test")
+queries = load_dataset("nlpai-lab/mlaire-xquad", "queries", split="test")
+qrels   = load_dataset("nlpai-lab/mlaire-xquad", "qrels",   split="test")
 ```
 
 Or simply install the companion package and run
@@ -82,3 +81,8 @@ mlaire --config mlaire/configs/xquad.yaml --model <hf-model-id>
 
 which downloads these files automatically and reproduces every metric we
 report in the paper.
+
+## License
+
+Derived from XQuAD, which is released under CC BY-SA 4.0; this derivative is
+redistributed under the same license.

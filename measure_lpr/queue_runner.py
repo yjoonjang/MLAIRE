@@ -76,6 +76,9 @@ def _build_cmd(job: dict, dataset: str) -> tuple[Path, list[str]]:
         script = REPO_ROOT / "measure_lpr" / "compute_lpr_colbert.py"
         argv = [str(venv_py), str(script),
                 "--variant", job["variant"], "--dataset", dataset]
+    elif backend in ("bgem3sparse", "bgem3colbert"):
+        script = REPO_ROOT / "measure_lpr" / f"compute_lpr_{backend}.py"
+        argv = [str(venv_py), str(script), "--dataset", dataset]
     else:
         raise ValueError(f"unknown backend {backend}")
     return venv_py, argv

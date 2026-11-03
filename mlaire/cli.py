@@ -124,13 +124,13 @@ def run_evaluation(
     all_group_counts: dict[str, int] = {}
 
     # Default flow: pull BEIR-format files from the public Hugging Face repos
-    # (anonymous-submission-nips/mlaire-<dataset>). The user can override
+    # (nlpai-lab/mlaire-<dataset>). The user can override
     # with config["data_dir"] (local export) or config["use_canonical_loaders"]
     # (rederive from the upstream HF datasets via MLQA/XQuAD/Belebele loaders).
     data_dir = config.get("data_dir")
     use_canonical = config.get("use_canonical_loaders", False)
     hf_repo_prefix = config.get(
-        "hf_repo_prefix", "anonymous-submission-nips/mlaire"
+        "hf_repo_prefix", "nlpai-lab/mlaire"
     )
 
     for ds_name, ds_config in config["datasets"].items():

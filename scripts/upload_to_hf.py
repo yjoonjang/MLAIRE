@@ -3,9 +3,9 @@
 The script reads its access token from the ``HF_TOKEN`` environment
 variable (never from disk) and pushes one repository per dataset:
 
-    anonymous-submission-nips/mlaire-mlqa
-    anonymous-submission-nips/mlaire-xquad
-    anonymous-submission-nips/mlaire-belebele
+    nlpai-lab/mlaire-mlqa
+    nlpai-lab/mlaire-xquad
+    nlpai-lab/mlaire-belebele
 
 Old layout artefacts (``corpus.jsonl``, ``queries.jsonl``,
 ``qrels/test.tsv``) from any previous upload are deleted before pushing
@@ -30,7 +30,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-HF_USER = "anonymous-submission-nips"
+HF_USER = "nlpai-lab"
 
 # Files from the previous (raw JSONL/TSV) layout that should be removed
 # before re-uploading the MTEB-style parquet files.

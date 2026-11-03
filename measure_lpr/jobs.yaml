@@ -9,6 +9,8 @@
 #   bm25        -> compute_lpr_bm25.py      (--dataset DS)
 #   opensearch  -> compute_lpr_opensearch.py(--dataset DS)
 #   colbert     -> compute_lpr_colbert.py   (--variant {jina|lfm2} --dataset DS)
+#   bgem3sparse -> compute_lpr_bgem3sparse.py  (--dataset DS)
+#   bgem3colbert-> compute_lpr_bgem3colbert.py (--dataset DS)
 #
 # Venvs (relative to repo root):
 #   .venv                main: torch + transformers 5.x + flash-attn
@@ -81,3 +83,5 @@ jobs:
   - { backend: opensearch, venv: .venv-colbert-sparse, model: "opensearch_neural_sparse" }
   - { backend: colbert, venv: .venv-colbert-sparse, model: "jina_colbert_v2",   variant: jina }
   - { backend: colbert, venv: .venv-colbert-sparse, model: "lfm2_colbert_350m", variant: lfm2 }
+  - { backend: bgem3sparse,  venv: .venv-colbert-sparse, model: "bge-m3-sparse" }
+  - { backend: bgem3colbert, venv: .venv-colbert-sparse, model: "bge-m3-colbert" }
